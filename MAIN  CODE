@@ -1,0 +1,173 @@
+#include<stdio.h>
+#include<math.h>
+#define HEIGHT 15
+#define POINTS 60
+
+//  Function to plot wavefunction ψn(x)
+void plot_wave(double L, int n) {
+    int i, j;
+    printf("\nψ%d(x):\n", n);
+    for (i = 0; i < HEIGHT; i++) {
+        double y = 1.0 - (2.0 * i) / (HEIGHT - 1);
+        for (j = 0; j < POINTS; j++) {
+            double x = (L * j) / (POINTS - 1);
+            double psi = sin(n * M_PI * x / L);
+
+            if (fabs(psi - y) < 0.1) {
+                printf("*");
+            }
+            else if (fabs(y) < 0.05) {
+                if (j == 0 || j == POINTS - 1) printf("|");
+                else {
+                    double node = sin(n * M_PI * x / L);
+                    if (fabs(node) < 0.05) printf("+");
+                    else printf("-");
+                }
+            } else printf(" ");
+        }
+        printf("\n");
+    }
+
+    printf("0");
+    for (j = 1; j < POINTS - 1; j++) {
+        double x = (L * j) / (POINTS - 1);
+        double node = sin(n * M_PI * x / L);
+        if (fabs(node) < 0.05) printf("   %.1f", x);
+    }
+    printf("   %.1f\n", L);
+}
+
+// NEW FUNCTION: Probability density |ψn(x)|²
+void plot_probability(double L, int n) {
+    int i, j;
+    printf("\n|ψ%d(x)|²:\n", n);
+    for (i = 0; i < HEIGHT; i++) {
+        double y = 1.0 - (2.0 * i) / (HEIGHT - 1);
+        for (j = 0; j < POINTS; j++) {
+            double x = (L * j) / (POINTS - 1);
+            double psi2 = pow(sin(n * M_PI * x / L), 2);  // probability density
+
+            if (fabs(psi2 - (y + 1) / 2) < 0.05) {
+                printf("*");
+            }
+            else if (fabs(y) < 0.05) {
+                if (j == 0 || j == POINTS - 1) printf("|");
+                else printf("-");
+            } else printf(" ");
+        }
+        printf("\n");
+    }
+
+    printf("0");
+    for (j = 1; j < POINTS - 1; j++) {
+        double x = (L * j) / (POINTS - 1);
+        double node = sin(n * M_PI * x / L);
+        if (fabs(node) < 0.05) printf("   %.1f", x);
+    }
+    printf("   %.1f\n", L);
+}
+
+int main() {
+    int l, n, nm[3];
+    char g, ns;
+
+    printf("Enter width of the box: ");
+    scanf("%d", &l);
+
+    printf("WHAT DO YOU WANT TO OBSERVE---\n");
+    printf("1) Wavefunction graph? (type 'w')\n");
+    printf("2) Energy eigen graph? (type 'e')\n");
+    printf("3) Probability density graph? (type 'p')\n"); 
+    scanf(" %c", &g);
+
+    printf("n=? single(type 's') or multiple(type 'm'): ");
+    scanf(" %c", &ns);
+
+    if (ns == 's') {
+        printf("Value of n? ");
+        scanf("%d", &n);
+    } else {
+        printf("Value of n?\n");
+        for (int input = 0; input < 3; input++) {
+            scanf("%d", &nm[input]);
+        }
+    }
+
+    // ENERGY GRAPH
+    if (g == 'e' && ns == 's') {
+        int realn = (n * n);
+        for (int i = 1; i <= realn; i++) {
+            if (i == 1) printf("BOUNDARY=------------------------------------------------------------------------------\n");
+            else if (i == 2) {
+                printf("E1=");
+                for (int j = 1; j <= l; j++) {
+                    if (j == 1 || j == l) printf("|");
+                    else printf("-");
+                }
+            } else if (i == realn) {
+                printf("E%d=", n);
+                for (int j = 1; j <= l; j++) {
+                    if (j == 1 || j == l) printf("|");
+                    else printf("-");
+                }
+            } else {
+                for (int j = 1; j <= l; j++) {
+                    if (j == 1 || j == l) printf("   |");
+                    else printf(" ");
+                }
+            }
+            printf("\n");
+        }
+    }
+
+    if (g == 'e' && ns == 'm') {
+        int n1 = nm[0] * nm[0];
+        int n2 = nm[1] * nm[1];
+        int n3 = nm[2] * nm[2];
+        for (int i = 1; i <= n3; i++) {
+            if (i == 1 || n1 == 1) {
+                printf("BOUNDARY=----\n");
+                printf("E1=");
+                for (int j = 1; j <= l; j++) {
+                    if (j == 1 || j == l) printf("|");
+                    else printf("-");
+                }
+            } else if (i == n1) {
+                printf("E%d=", nm[0]);
+                for (int j = 1; j <= l; j++) {
+                    if (j == 1 || j == l) printf("|");
+                    else printf("-");
+                }
+            } else if (i == n2) {
+                printf("E%d=", nm[1]);
+                for (int j = 1; j <= l; j++) {
+                    if (j == 1 || j == l) printf("|");
+                    else printf("-");
+                }
+            } else if (i == n3) {
+                printf("E%d=", nm[2]);
+                for (int j = 1; j <= l; j++) {
+                    if (j == 1 || j == l) printf("|");
+                    else printf("-");
+                }
+            } else {
+                for (int j = 1; j <= l; j++) {
+                    if (j == 1) printf("   |");
+                    else if (j == l) printf("|");
+                    else printf(" ");
+                }
+            }
+            printf("\n");
+        }
+    }
+
+    // WAVEFUNCTION GRAPH
+    if (g == 'w' && ns == 's') plot_wave(l, n);
+    if (g == 'w' && ns == 'm') for (int i = 0; i < 3; i++) plot_wave(l, nm[i]);
+
+    //  PROBABILITY DENSITY GRAPH
+    if (g == 'p' && ns == 's') plot_probability(l, n);
+    if (g == 'p' && ns == 'm') for (int i = 0; i < 3; i++) plot_probability(l, nm[i]);
+
+    return 0;
+}
